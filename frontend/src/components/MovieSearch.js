@@ -13,11 +13,13 @@ function MovieSearch() {
     //form inputs
     let [movieTitle, setMovieTitle] = useState("");
     //form response data
-    //setting response as an object in case a response object cant be given for the given ID
+    //setting response as a default object
     let [response, setResponse] = useState({"id": "",
                                             "title": "",
                                             "image": "",
                                             "description": ""});
+    //separate object for errors to display when they occur
+    let [errorMessage, setErrorMessage] = useState({"message": ""});
 
     //sendForm function is triggered for submition of form data to the server, and returns an appropriate response
     let sendForm = (e) => {
@@ -28,7 +30,7 @@ function MovieSearch() {
         //handling case where no movie title is given
         if (movieTitle === "") {
             console.log("Error: Please enter a movie title.");
-            setResponse({"message": "Error: Please enter a movie title and try again."});
+            setErrorMessage({"message": "Error: Please enter a movie title and try again."});
             return;
         }
 
@@ -42,13 +44,22 @@ function MovieSearch() {
             setResponse(response.data.results);
             //clearing input fields after successful submission
             setMovieTitle("");
+            //resetting error message
+            if (typeof response != "nothing" && typeof response.data.results[0] != "undefined") {
+                setErrorMessage({"message": ""});
+            }
+            //handling errors not caught by .catch (since they dont break the axios request for 404 and 500 errors)
+            else {
+                console.log("Axios Search Error");
+                setErrorMessage({"message": "Error: Movie not found"});
+            }
         })
         .catch((error) => {
             //case error
             //outputs the error message from the server to the console
-            console.log(error.response.data.message);
+            console.log("Axios Search Error.");
             //and sets it as the response for the <div> on the website
-            setResponse(error.response.data);
+            setErrorMessage({"message": "Error: Movie not found."});
         })
         .then(() => {
             //always executed
@@ -70,9 +81,13 @@ function MovieSearch() {
 
     {/* Search results */}
     <div name="res" id="res"> <br/>
-        {/*unordered list appears when 'response' variable becomes the server response's results */}
-        {typeof response.id === "undefined" && <h4>Results:</h4>}
-        {typeof response.id === "undefined" &&
+        {/* Errors for IMDB server errors or no results found*/}
+        {/* response is null if there is a server error, or an empty array if no search matches are found*/}
+        {errorMessage.message.length > 0 && (typeof response === "nothing" || typeof response[0] === "undefined") &&
+        <p>{errorMessage.message}</p>}
+        {/*unordered list appears when 'response' variable becomes the server response's results (successful)) */}
+        {typeof response.id === "undefined" && typeof response[0] != "undefined" && <h4>Results:</h4>}
+        {typeof response.id === "undefined" && typeof response[0] != "undefined" &&
         <ul className="list-group">
             {/*Mapping the response results array and returning a dynamic unordered list*/}
             {response.map((movie) => {
