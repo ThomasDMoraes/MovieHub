@@ -8,7 +8,8 @@ import Home from './components/Home'
 import MovieSearch from './components/MovieSearch'
 import MovieRatings from './components/MovieRatings'
 import Login from './components/Login'
-//import MovieInfo from './components/MovieInfo'
+import MovieInfo from './components/MovieInfo'
+//import { process_params } from 'express/lib/router';
 
 function App() {
   //const [input, setInput] = useState("");
@@ -24,8 +25,10 @@ function App() {
 
       <Routes>
         <Route path = "/" element={<Home/>} />
-        <Route path = "/search" element={<MovieSearch/>} />
-        <Route path = "/rating" element={<MovieRatings/>} />
+        <Route path = "/search/*" element={<MovieSearch/>} />
+        <Route path = "/rating/" element={<MovieRatings/>} />
+        {/* MovieInfo has movieId passed as children to use for re-rendering the page appropriately */}
+        <Route path = "/MovieInfo/:movieId" element={<MovieInfo/>} />
         {/* <Route path = "/Login" element={<Login/>} /> */}
       </Routes>
     </BrowserRouter>

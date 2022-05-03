@@ -6,8 +6,11 @@
 //also need to integrate react-bootstrap for formatting
 //may also combine with Title and Rating IMDB endpoints to get a better descriptions and ratings
 
-import { useState } from 'react'
+import { useState } from 'react';
 import axios from 'axios';
+//importing router tags for MovieInfo pages
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import MovieInfo from './MovieInfo';
 
 function MovieSearch() {
     //form inputs
@@ -111,10 +114,16 @@ function MovieSearch() {
 function Movie(props) {
     return (
         <li className="list-group-item">
-            <img src={props.image} height="200"/>
+            <img src={props.image} alt="" height="200"/>
             <p>
                 <strong>ID:</strong> {props.movie_id} <strong>Title:</strong> {props.title} <strong>Description:</strong> {props.description}
             </p>
+                {/* Including a link to the corresponding MovieInfo page using a route, link, and ID prop */}
+                <Link to = {'/MovieInfo/' + props.movie_id}>Visit</Link>
+                <Routes>
+                    <Route path = {'/MovieInfo' + props.movie_id} element={<MovieInfo/>} />
+                </Routes>
+
         </li>
     )
 }

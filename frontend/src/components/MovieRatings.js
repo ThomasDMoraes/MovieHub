@@ -6,8 +6,9 @@
 //notes: still need to make the movie info pages, called when a movie is selected
 //also need to integrate react-bootstrap for formatting
 
-import { useState } from 'react'
+import { useState } from 'react';
 import axios from 'axios';
+import MovieInfo from './MovieInfo';
 
 function MovieRatings() {
     //form inputs
@@ -178,7 +179,7 @@ function MovieRatings() {
 function Movie(props) {
     return (
         <li className="list-group-item">
-            <img src={props.image} height="200"/>
+            <img src={props.image} alt="" height="200"/>
             <p>
             <strong>Rank: </strong> {props.movie_rank} <strong>ID:</strong> {props.movie_id} <strong>Title:</strong> {props.title} <strong>Rating:</strong> {props.rating}
             </p>
