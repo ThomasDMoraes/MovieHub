@@ -75,7 +75,7 @@ function MovieSearch() {
     <h3>Search for a movie:</h3>
     {/* Search form */}
     <form onSubmit={sendForm} target="res">
-        <label htmlFor="movie_id">Search (Title): </label>
+        <label htmlFor="movie_title">Search (Title): </label>
         <input type="text" name="movie_title" size="20" id="movie_title" value={movieTitle} onChange={(e) => setMovieTitle(e.target.value)}/>
         <br /> <br />
         <button className="btn-primary" id="submit_btn" onClick={sendForm} >Submit</button>

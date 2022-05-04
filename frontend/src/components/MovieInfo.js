@@ -53,7 +53,7 @@ function MovieInfo() {
         {typeof response.fullTitle != "undefined" && response.fullTitle && 
         <>
             {/* movie image/poster */}
-            <img src={response.image} height="400" />
+            <img src={response.image} alt="" height="400" />
             {/* movie title header */}
             <h2>Title: {response.fullTitle}</h2>
             {/* movie plot paragraph */}
