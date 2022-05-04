@@ -22,7 +22,7 @@ function MovieInfo() {
     //takes the movie ID in the URL parameters
     let { movieId } = useParams();
     
-    //ShowInfo function is called once the page is rendered
+    //useEffect hook is called once the page is rendered to retrieve and show movie info
     //and displays the page's selected movie information
     useEffect(() => {
         setTimeout(() => {
@@ -47,14 +47,13 @@ function MovieInfo() {
         }, 1000);
     }, []);
     
-
-
      return (<>
         {/* outputting the movie information if successful */}
+        {/* make the components into a grid for better layout */}
         {typeof response.fullTitle != "undefined" && response.fullTitle && 
         <>
             {/* movie image/poster */}
-            <img src={response.image} />
+            <img src={response.image} height="400" />
             {/* movie title header */}
             <h2>Title: {response.fullTitle}</h2>
             {/* movie plot paragraph */}

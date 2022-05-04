@@ -8,6 +8,8 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+//importing router tags for MovieInfo pages
+import { Routes, Route, Link } from 'react-router-dom';
 import MovieInfo from './MovieInfo';
 
 function MovieRatings() {
@@ -26,7 +28,11 @@ function MovieRatings() {
                                                         "image": "",
                                                         "description": ""});
     //separate object for errors to display when they occur
-    let [errorMessage, setErrorMessage] = useState({"message": ""});        
+    let [errorMessage, setErrorMessage] = useState({"message": ""});    
+
+    //placeholder for the movie ID, which is not retrieved with the ratings
+    //used to link to the MovieRatings page
+    let [idHolder, setIdHolder] = useState("");
 
     //sendRatingsForm function is triggered for submition of form data to the server, and returns an appropriate response
     //for the singular movie ratings search by ID
@@ -34,6 +40,8 @@ function MovieRatings() {
         console.log("Movie Rating test!!!");
         e.preventDefault();
         console.log("Search parameter:", movieId);
+        //used for MovieInfo page link
+        setIdHolder(movieId);
 
         //handling case where no movie title is given
         if (movieId === "") {
@@ -125,24 +133,16 @@ function MovieRatings() {
         {/*searched movie rating appears when 'response' variable becomes the server response's results */}
         {typeof ratingsResponse.id === "undefined" && ratingsResponse.fullTitle && <h4>Results:</h4>}
         {typeof ratingsResponse.id === "undefined" && ratingsResponse.fullTitle &&
-        <p>Title:{ratingsResponse.fullTitle} <br/> IMDB Rating: {ratingsResponse.imDb}</p>}
-        {/*unordered list of top 250 movies appears when the button is pressed */}
-        {typeof ratingsResponse.id === "undefined" && <ul className="list-group">
-            {/*Header row*/}
-            {/*Mapping the response array and returning dynamic table rows and elements*/}
-            {//response.map((movie) => {
-                //console.log(movie);
-                //return (<Movie
-                    //key = {movie.id}
-                    //movie_id = {movie.id}
-                    //title = {movie.title}
-                    //image = {movie.image}
-                    //description = {movie.description}
-                ///>)
-            //})
-        }</ul>
-        }
+        <>
+            <p>Title:{ratingsResponse.fullTitle} <br/> IMDB Rating: {ratingsResponse.imDb}</p>
+            {/* Including a link to the corresponding MovieInfo page using a route and link node */}
+            <Link to = {'/MovieInfo/' + idHolder}>Visit</Link>
+            <Routes>
+                <Route path = {'/MovieInfo' + idHolder} element={<MovieInfo/>} />
+            </Routes>
+        </>}
     </div>
+    
     {/* Top 250 Movies section */}
     <h3>Top 250 Movies:</h3>
     {/* Top 250 form (just a button to send the request through the sendTop250Form function) */}
@@ -183,6 +183,11 @@ function Movie(props) {
             <p>
             <strong>Rank: </strong> {props.movie_rank} <strong>ID:</strong> {props.movie_id} <strong>Title:</strong> {props.title} <strong>Rating:</strong> {props.rating}
             </p>
+            {/* Including a link to the corresponding MovieInfo page using a route, link, and ID prop */}
+            <Link to = {'/MovieInfo/' + props.movie_id}>Visit</Link>
+            <Routes>
+                <Route path = {'/MovieInfo' + props.movie_id} element={<MovieInfo/>} />
+            </Routes>
         </li>
     )
 }

@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 //importing router tags for MovieInfo pages
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import MovieInfo from './MovieInfo';
 
 function MovieSearch() {
@@ -118,12 +118,11 @@ function Movie(props) {
             <p>
                 <strong>ID:</strong> {props.movie_id} <strong>Title:</strong> {props.title} <strong>Description:</strong> {props.description}
             </p>
-                {/* Including a link to the corresponding MovieInfo page using a route, link, and ID prop */}
-                <Link to = {'/MovieInfo/' + props.movie_id}>Visit</Link>
-                <Routes>
-                    <Route path = {'/MovieInfo' + props.movie_id} element={<MovieInfo/>} />
-                </Routes>
-
+            {/* Including a link to the corresponding MovieInfo page using a route, link, and ID prop */}
+            <Link to = {'/MovieInfo/' + props.movie_id}>Visit</Link>
+            <Routes>
+                <Route path = {'/MovieInfo' + props.movie_id} element={<MovieInfo/>} />
+            </Routes>
         </li>
     )
 }

@@ -21,15 +21,15 @@ function App() {
       <Link to='/'>Home</Link> <br />
       <Link to='/Search'>Movies</Link> <br />
       <Link to='/Rating'>Ratings</Link> <br />
-      {/* <Link to='/Login'>Login</Link> */} <br /> <br /> <br /> 
+      <Link to='/Login'>Login</Link> <br /> <br /> <br /> 
 
       <Routes>
         <Route path = "/" element={<Home/>} />
         <Route path = "/search/*" element={<MovieSearch/>} />
-        <Route path = "/rating/" element={<MovieRatings/>} />
+        <Route path = "/rating/*" element={<MovieRatings/>} />
         {/* MovieInfo has movieId passed as children to use for re-rendering the page appropriately */}
         <Route path = "/MovieInfo/:movieId" element={<MovieInfo/>} />
-        {/* <Route path = "/Login" element={<Login/>} /> */}
+        <Route path = "/Login" element={<Login/>} />
       </Routes>
     </BrowserRouter>
   );
