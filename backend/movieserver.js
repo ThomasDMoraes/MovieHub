@@ -1,18 +1,4 @@
-//movieserver.js
-
-//SearchMovie IMDB API
-//Title IMDB API
-//Ratings IMDB API
-//Top250Movies IMDB API
-//MostPopularMovies IMDB API (bonus later on)
-
-//watchlist (4): LIST movies in watchlist, VIEW a movie's details in the watchlist, ADD / DELETE a movie from it
-//try making a new database collection for the watchlist. Might be the only use for Mongo, maybe logins also
-
-//*routes will require a user to be logged in*
-
-
-
+//movieserver.js (backend NodeJS local server)
 
 //importing modules
 const express = require('express');
@@ -21,12 +7,27 @@ const bodyParser = require('body-parser');
 const res = require('express/lib/response');
 const fetch = require('node-fetch'); //running version 2 since ESM wasn't working
 const fs = require('fs');
+const { query } = require('express');
 const MongoClient = require('mongodb').MongoClient;
+
+//*routes will require a user to be logged in* (not implemented yet)
+//used for Firebase Admin SDK authorization
+var admin = require("firebase-admin");
+//importing service account details
+var serviceAccount = require("./adminSDK_serviceAccount.json");
+//const { sendFile } = require('express/lib/response');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
 
 //allows data retrieval without using an HTML document form
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('./public'));
+
+
 
 //Allowing website connections without triggering a CORS error (as shown in the lecture)
 app.use((req, res, next) => {
@@ -43,6 +44,29 @@ app.use((req, res, next) => {
 })
 
 
+//idToken comes from the frontend through an Axios request
+//not very safe private data handling, but it works for now
+//incomplete as I can't figure out how to make admin SDK work
+
+app.get('/verifyUser', function(req, res) {
+    idToken = req.query.idToken;
+    //verifying token integrity
+        //getAuth().verifyIdToken(idToken)
+        console.log(idToken)
+        
+      .then((decodedToken) => {
+        //const uid = decodedToken.uid;
+        //console.log("user uid:", uid)
+        //res.status(200).send({"uid": uid})
+      })
+      .catch((error) => {
+        //console.log("Token verification failed.");
+        //res.status(500).send({"error": error});
+      });
+})
+
+
+
 //IMDB endpoints: ----------------------------------------------------
 
 //Getting the API key from a JSON config file
@@ -53,6 +77,9 @@ app.get('/search', function(req, res) {
 
     //for debugging (inside movie search route)
     console.log("STATUS: searchMovie request!");
+
+    //insert authentication check
+
 
     //URL of IMDB endpoint for external GET request
     //title is the user search parameter

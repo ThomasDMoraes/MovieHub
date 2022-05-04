@@ -9,7 +9,7 @@ import Login from './components/Login'
 import MovieInfo from './components/MovieInfo'
 //import { process_params } from 'express/lib/router';
 //used for authorization and logging out
-import { auth, logout } from './components/Login'
+import { auth, logout, logInCheck } from './components/Login'
 //needed to check on firebase Auth state
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -27,14 +27,19 @@ function App() {
       <Link to='/Rating'>Ratings</Link> <br />
       {/* Login link appears if user is not logged in (once firebase auth is loaded) */}
       {!loading && !user && <Link to='/Login'>Login</Link>}
+      {/* Logout link if logged in. Redirects to the home page. */}
+      {user && <Link to='/' onClick={logout}>Logout</Link>} <br/>
       {/* Showing that the user is logged in */}
-      {user && <span>Logged in as: {user.email}</span>}
+      {user && <span>Logged in as: <strong>{user.email}</strong></span>} <br/>
+
+      {user && <button onClick={() => logInCheck}>LoginCheck (testing)</button>} <br/>
       
       <br /> <br /> <br /> 
 
-      {/* Next: logout button for those signed in. dont need one in the login page. */}
-      {/* Next: redirect to login/register page if the user is not signed in */}
-      {/* Next: apply login restrictions to the backend and other frontend pages */}
+
+
+
+      {/* Next: apply login restrictions to the backend */}
       {/* Next: put Watchlist in the navbar */}
       {/* Next: Watchlist (list,add,delete,view) implementations, with login and mongoDB */}
       {/* Next: integrate bootstrap and work on formatting / lists to grids */}

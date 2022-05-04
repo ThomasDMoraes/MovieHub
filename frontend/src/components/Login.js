@@ -26,6 +26,9 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+//used to send API tokens to the backend server
+import axios from 'axios';
+
 
 //Firebase configuration object
 const firebaseConfig = {
@@ -109,6 +112,32 @@ const logout = () => {
     signOut(auth);
 };
 
+//get token
+//send token to backend
+//verify token in backend
+//retrieve success or error response
+const logInCheck = () => {
+    if (!auth.currentUser) {
+        console.log("not logged in.");
+    }
+    else {
+        console.log("logged in.");
+    auth.currentUser.getIdToken(true)
+        .then(idToken => {
+        // Send token to your backend with axios request
+        axios.get('http://localhost:5500/verifyUser?idToken=' + idToken)
+            .then((response) => {
+                console.log("response:", response)
+                //handle response
+            })
+        })
+        .catch(error => {
+            console.log("logInCheck error.")
+            //handle error
+        });
+    }
+}
+
 //login function that implements the other functions to operate on the react app
 function Login() {
     //user form inputs
@@ -122,6 +151,7 @@ function Login() {
     const navigate = useNavigate();
 
     //certified users are redirected to the Home page
+
     useEffect(() => {
         if (user) {
             navigate("./../");
@@ -177,11 +207,13 @@ function Login() {
                 </div>
             </div>
         </div>
+
+        {/* <button onClick = {() => logInCheck()}>LOGIN CHECK (for testing)</button> */}
+
     </>);
 }
 
 
 
-
 export default Login;
-export { auth, db, logout};
+export { auth, db, logout, logInCheck};

@@ -9,10 +9,20 @@
 import { useState } from 'react';
 import axios from 'axios';
 //importing router tags for MovieInfo pages
-import { Routes, Route, Link } from 'react-router-dom';
+//useNavigation hook used for login button redirection
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import MovieInfo from './MovieInfo';
+import { auth } from './Login'
+//needed to check on firebase Auth state
+import { useAuthState } from "react-firebase-hooks/auth";
+
 
 function MovieRatings() {
+    //authentication hook for authorization check
+    const [user, loading, error] = useAuthState(auth);
+    //used for authorization redirection
+    const navigate = useNavigate();
+
     //form inputs
     let [movieId, setMovieId] = useState("");
     //form 1 (ratings search) response data
@@ -112,65 +122,77 @@ function MovieRatings() {
         })
     };
 
-    //anonymous function used for onChange to update Title input box with user inputs by altering the state
-    //the appropriate response is shown below the form on submission using && operators for responsiveness
-    return (<>
-    <h3>Search for a movie's Rating:</h3>
-    {/* Search form */}
-    <form onSubmit={sendRatingsForm} target="res1">
-        <label htmlFor="movie_id">Search (ID): </label>
-        <input type="text" name="movie_id" size="20" id="movie_id" value={movieId} onChange={(e) => setMovieId(e.target.value)}/>
-        <br /> <br />
-        <button className="btn-primary" id="submit_btn" onClick={sendRatingsForm} >Submit</button>
-    </form>
-    <br />
+    //renders a log in redirection button if user is not logged in after the authentication state is loaded
+    if (!loading && !user) {
+        return (<div>
+            <h3>Please log in and try again.</h3>
+            <button onClick={() => {navigate('.././Login')}}>Go to Login Page</button>
 
-    {/* Search results */}
-    <div name="res1" id="res1"> <br/>
-        {/* Error message is shown if a movie is not found in the IMDB database */}
-        {errorMessage.message.length > 0 && typeof ratingsResponse.id === "undefined" && !ratingsResponse.fullTitle &&
-        <p>{errorMessage.message}</p>}
-        {/*searched movie rating appears when 'response' variable becomes the server response's results */}
-        {typeof ratingsResponse.id === "undefined" && ratingsResponse.fullTitle && <h4>Results:</h4>}
-        {typeof ratingsResponse.id === "undefined" && ratingsResponse.fullTitle &&
-        <>
-            <p>Title:{ratingsResponse.fullTitle} <br/> IMDB Rating: {ratingsResponse.imDb}</p>
-            {/* Including a link to the corresponding MovieInfo page using a route and link node */}
-            <Link to = {'/MovieInfo/' + idHolder}>Visit</Link>
-            <Routes>
-                <Route path = {'/MovieInfo' + idHolder} element={<MovieInfo/>} />
-            </Routes>
-        </>}
-    </div>
-    
-    {/* Top 250 Movies section */}
-    <h3>Top 250 Movies:</h3>
-    {/* Top 250 form (just a button to send the request through the sendTop250Form function) */}
-    <form onSubmit={sendTop250Form} target="res2">
-        <button className="btn-primary" id="submit_btn" onClick={sendTop250Form} >Show</button>
-    </form>
-    <br />
-    {/* Top 250 Movies results */}
-    <div name="res2" id="res2">
-        {typeof top250Response.items != "undefined" && <h4>Results:</h4>}
-        {typeof top250Response.items != "undefined" &&
-         <ul>
-            {/*Mapping the response results array and returning a dynamic unordered list*/}
-            {top250Response.items.map((movie) => {
-                console.log(movie);
-                return (<Movie
-                    key = {movie.id}
-                    movie_id = {movie.id}
-                    movie_rank = {movie.rank}
-                    title = {movie.fullTitle}
-                    image = {movie.image}
-                    rating = {movie.imDbRating}
-                />)
-            })}
-        </ul>}
+        </div>)
+    }
+    //user is comfirmed as logged in
+    else if (!loading && user) {
+        return (<>
+        <h3>Search for a movie's Rating:</h3>
+        {/* Search form */}
+        <form onSubmit={sendRatingsForm} target="res1">
+            <label htmlFor="movie_id">Search (ID): </label>
+            {/*anonymous function used for onChange to update Title input box with user inputs by altering the state*/}
+            {/*the appropriate response is shown below the form on submission using && operators for responsiveness*/}
+            <input type="text" name="movie_id" size="20" id="movie_id" value={movieId} 
+            onChange={(e) => setMovieId(e.target.value)}/>
+            <br /> <br />
+            <button className="btn-primary" id="submit_btn" onClick={sendRatingsForm} >Submit</button>
+        </form>
+        <br />
 
-    </div>
-</>)};
+        {/* Search results */}
+        <div name="res1" id="res1"> <br/>
+            {/* Error message is shown if a movie is not found in the IMDB database */}
+            {errorMessage.message.length > 0 && typeof ratingsResponse.id === "undefined" && !ratingsResponse.fullTitle &&
+            <p>{errorMessage.message}</p>}
+            {/*searched movie rating appears when 'response' variable becomes the server response's results */}
+            {typeof ratingsResponse.id === "undefined" && ratingsResponse.fullTitle && <h4>Results:</h4>}
+            {typeof ratingsResponse.id === "undefined" && ratingsResponse.fullTitle &&
+            <>
+                <p>Title:{ratingsResponse.fullTitle} <br/> IMDB Rating: {ratingsResponse.imDb}</p>
+                {/* Including a link to the corresponding MovieInfo page using a route and link node */}
+                <Link to = {'/MovieInfo/' + idHolder}>Visit</Link>
+                <Routes>
+                    <Route path = {'/MovieInfo' + idHolder} element={<MovieInfo/>} />
+                </Routes>
+            </>}
+        </div>
+        
+        {/* Top 250 Movies section */}
+        <h3>Top 250 Movies:</h3>
+        {/* Top 250 form (just a button to send the request through the sendTop250Form function) */}
+        <form onSubmit={sendTop250Form} target="res2">
+            <button className="btn-primary" id="submit_btn" onClick={sendTop250Form} >Show</button>
+        </form>
+        <br />
+        {/* Top 250 Movies results */}
+        <div name="res2" id="res2">
+            {typeof top250Response.items != "undefined" && <h4>Results:</h4>}
+            {typeof top250Response.items != "undefined" &&
+            <ul>
+                {/*Mapping the response results array and returning a dynamic unordered list*/}
+                {top250Response.items.map((movie) => {
+                    console.log(movie);
+                    return (<Movie
+                        key = {movie.id}
+                        movie_id = {movie.id}
+                        movie_rank = {movie.rank}
+                        title = {movie.fullTitle}
+                        image = {movie.image}
+                        rating = {movie.imDbRating}
+                    />)
+                })}
+            </ul>}
+
+        </div>
+    </>)};
+}
 
 
 //Movie tag for the list mapping (needs bootstrap formatting)

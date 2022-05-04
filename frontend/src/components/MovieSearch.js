@@ -9,10 +9,21 @@
 import { useState } from 'react';
 import axios from 'axios';
 //importing router tags for MovieInfo pages
-import { Routes, Route, Link } from 'react-router-dom';
+//useNavigation hook used for login button redirection
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import MovieInfo from './MovieInfo';
+//authentication imports
+import { auth } from './Login'
+//needed to check on firebase Auth state
+import { useAuthState } from "react-firebase-hooks/auth";
+
 
 function MovieSearch() {
+    //authentication hook for authorization check
+    const [user, loading, error] = useAuthState(auth);
+    //used for authorization redirection
+    const navigate = useNavigate();
+
     //form inputs
     let [movieTitle, setMovieTitle] = useState("");
     //form response data
@@ -69,44 +80,56 @@ function MovieSearch() {
         })
     };
 
-    //anonymous function used for onChange to update Title input box with user inputs by altering the state
-    //the appropriate response is shown below the form on submission using && operators for responsiveness
-    return (<>
-    <h3>Search for a movie:</h3>
-    {/* Search form */}
-    <form onSubmit={sendForm} target="res">
-        <label htmlFor="movie_title">Search (Title): </label>
-        <input type="text" name="movie_title" size="20" id="movie_title" value={movieTitle} onChange={(e) => setMovieTitle(e.target.value)}/>
-        <br /> <br />
-        <button className="btn-primary" id="submit_btn" onClick={sendForm} >Submit</button>
-    </form>
-    <br />
+    //renders a log in redirection button if user is not logged in after the authentication state is loaded
+    if (!loading && !user) {
+        return (<div>
+            <h3>Please log in and try again.</h3>
+            <button onClick={() => {navigate('.././Login')}}>Go to Login Page</button>
 
-    {/* Search results */}
-    <div name="res" id="res"> <br/>
-        {/* Errors for IMDB server errors or no results found*/}
-        {/* response is null if there is a server error, or an empty array if no search matches are found*/}
-        {errorMessage.message.length > 0 && (typeof response === "nothing" || typeof response[0] === "undefined") &&
-        <p>{errorMessage.message}</p>}
-        {/*unordered list appears when 'response' variable becomes the server response's results (successful)) */}
-        {typeof response.id === "undefined" && typeof response[0] != "undefined" && <h4>Results:</h4>}
-        {typeof response.id === "undefined" && typeof response[0] != "undefined" &&
-        <ul className="list-group">
-            {/*Mapping the response results array and returning a dynamic unordered list*/}
-            {response.map((movie) => {
-                console.log(movie);
-                return (<Movie
-                    key = {movie.id}
-                    movie_id = {movie.id}
-                    title = {movie.title}
-                    image = {movie.image}
-                    description = {movie.description}
-                />)
-            })}
-        </ul>
-        }
-    </div>
-</>)};
+        </div>)
+    }
+    //user is comfirmed as logged in
+    else if (!loading && user) {
+    return (<>
+        <h3>Search for a movie:</h3>
+        {/* Search form */}
+        <form onSubmit={sendForm} target="res">
+            <label htmlFor="movie_title">Search (Title): </label>
+            {/* anonymous function used for onChange to update Title input box with user inputs by altering the state */}
+            {/* the appropriate response is shown below the form on submission using && operators for responsiveness */}
+            <input type="text" name="movie_title" size="20" id="movie_title" value={movieTitle}
+             onChange={(e) => setMovieTitle(e.target.value)}/>
+            <br /> <br />
+            <button className="btn-primary" id="submit_btn" onClick={sendForm} >Submit</button>
+        </form>
+        <br />
+
+        {/* Search results */}
+        <div name="res" id="res"> <br/>
+            {/* Errors for IMDB server errors or no results found*/}
+            {/* response is null if there is a server error, or an empty array if no search matches are found*/}
+            {errorMessage.message.length > 0 && (typeof response === "nothing" || typeof response[0] === "undefined") &&
+            <p>{errorMessage.message}</p>}
+            {/*unordered list appears when 'response' variable becomes the server response's results (successful)) */}
+            {typeof response.id === "undefined" && typeof response[0] != "undefined" && <h4>Results:</h4>}
+            {typeof response.id === "undefined" && typeof response[0] != "undefined" &&
+            <ul className="list-group">
+                {/*Mapping the response results array and returning a dynamic unordered list*/}
+                {response.map((movie) => {
+                    console.log(movie);
+                    return (<Movie
+                        key = {movie.id}
+                        movie_id = {movie.id}
+                        title = {movie.title}
+                        image = {movie.image}
+                        description = {movie.description}
+                    />)
+                })}
+            </ul>
+            }
+        </div>
+    </>)};
+}
 
 
 //Movie tag for the list mapping (needs bootstrap formatting)
