@@ -12,11 +12,18 @@ import MovieInfo from './components/MovieInfo'
 import { auth, logout, logInCheck } from './components/Login'
 //needed to check on firebase Auth state
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useEffect } from 'react';
 
 
 function App() {
   //returns current logged in user
   const [user, loading, error] = useAuthState(auth);
+
+  //performs a logInCheck every time user changes
+  //on every react page
+  useEffect(() => {
+    logInCheck();
+  }, [user])
 
   return (
     //creating links to each of the routes
@@ -32,13 +39,17 @@ function App() {
       {/* Showing that the user is logged in */}
       {user && <span>Logged in as: <strong>{user.email}</strong></span>} <br/>
 
-      {user && <button onClick={() => logInCheck}>LoginCheck (testing)</button>} <br/>
+      {/* watchlist link */}
+      {/*user && <Link to='/Watchlist'>Watchlist</Link>*/}
+
+
+      {/*user && <button onClick={() => logInCheck}>LoginCheck (testing)</button>*/} <br/>
       
       <br /> <br /> <br /> 
 
 
 
-
+      {/* Next: uncomment navigation in Login.js */}
       {/* Next: apply login restrictions to the backend */}
       {/* Next: put Watchlist in the navbar */}
       {/* Next: Watchlist (list,add,delete,view) implementations, with login and mongoDB */}
@@ -53,6 +64,7 @@ function App() {
         {/* MovieInfo has movieId passed as children to use for re-rendering the page appropriately */}
         <Route path = "/MovieInfo/:movieId" element={<MovieInfo/>} />
         <Route path = "/Login" element={<Login/>} />
+        {/* <Route path = "/Watchlist" element={<Watchlist/> /> */}
       </Routes>
     </BrowserRouter>
   );

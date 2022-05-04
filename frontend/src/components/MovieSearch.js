@@ -2,7 +2,6 @@
 //contains a search form to send to the backend (movieserver.js) and retrieve matches
 //the form is handled as a GET request using Axios
 
-//notes: still need to make the movie info pages, called when a movie is selected
 //also need to integrate react-bootstrap for formatting
 //may also combine with Title and Rating IMDB endpoints to get a better descriptions and ratings
 

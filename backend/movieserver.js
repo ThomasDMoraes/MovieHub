@@ -15,8 +15,7 @@ const MongoClient = require('mongodb').MongoClient;
 var admin = require("firebase-admin");
 //importing service account details
 var serviceAccount = require("./adminSDK_serviceAccount.json");
-//const { sendFile } = require('express/lib/response');
-
+//initializing admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
@@ -43,25 +42,29 @@ app.use((req, res, next) => {
   next();
 })
 
+//used for authorization after authentication
+var loginStatus = false;
 
 //idToken comes from the frontend through an Axios request
 //not very safe private data handling, but it works for now
-//incomplete as I can't figure out how to make admin SDK work
-
 app.get('/verifyUser', function(req, res) {
+
     idToken = req.query.idToken;
-    //verifying token integrity
-        //getAuth().verifyIdToken(idToken)
-        console.log(idToken)
-        
+    admin.auth().verifyIdToken(idToken)  
       .then((decodedToken) => {
-        //const uid = decodedToken.uid;
-        //console.log("user uid:", uid)
-        //res.status(200).send({"uid": uid})
+        //valid token
+        const uid = decodedToken.uid;
+        console.log("user uid:", uid)
+        //updating login status for other endpoints to use
+        loginStatus = true;
+        res.status(200).send({"uid": uid})
       })
+      //invalid token
       .catch((error) => {
-        //console.log("Token verification failed.");
-        //res.status(500).send({"error": error});
+        console.log("Token verification failed.");
+        //updating login status for other endpoints to use
+        loginStatus = false;
+        res.status(500).send({"error": error});
       });
 })
 
@@ -75,12 +78,12 @@ const imdbKey = (JSON.parse(fs.readFileSync("backend/APIkey.json", "utf8"))).API
 //SearchMovies IMDB API
 app.get('/search', function(req, res) {
 
-    //for debugging (inside movie search route)
-    console.log("STATUS: searchMovie request!");
 
-    //insert authentication check
+  //for debugging (inside movie search route)
+  console.log("STATUS: searchMovie request!");
 
-
+  //authentication check
+  if (loginStatus) {
     //URL of IMDB endpoint for external GET request
     //title is the user search parameter
     var url = "https://imdb-api.com/en/API/SearchMovie/" + imdbKey + "/" + req.query.title;
@@ -98,14 +101,21 @@ app.get('/search', function(req, res) {
             console.log("MovieSearch FETCH Error!");
             res.status(500).send(err);
         });
+    }
+    else {
+      console.log("Search endpoint: invalid token (not logged in).");
+      res.status(500).send({"message": "Error: invalid token."});
+    }
 })
 
 //Title IMDB API
 app.get('/title', function(req, res) {
 
-    //for debugging (inside movie search route)
-    console.log("STATUS: Title (info) request!");
+  //for debugging (inside movie search route)
+  console.log("STATUS: Title (info) request!");
 
+  //authentication check
+  if (loginStatus) {
     //URL of IMDB endpoint for external GET request
     //movie_id is the user search parameter
     var url = "https://imdb-api.com/en/API/Title/" + imdbKey + "/" + req.query.movie_id;
@@ -123,31 +133,43 @@ app.get('/title', function(req, res) {
             console.log("Title FETCH Error!");
             res.status(500).send(err);
         });
+  }
+  else {
+    console.log("Title endpoint: invalid token (not logged in).");
+    res.status(500).send({"message": "Error: invalid token."});
+  }
 })
 
 //Ratings IMDB API
 app.get('/rating', function(req, res) {
 
-    //for debugging (inside movie search route)
-    console.log("STATUS: Rating request!");
+  //for debugging (inside movie search route)
+  console.log("STATUS: Rating request!");
 
-    //URL of IMDB endpoint for external GET request
-    //movie_id is the user search parameter
-    var url = "https://imdb-api.com/en/API/Ratings/"  + imdbKey + "/" + req.query.movie_id;
-    
-    //fetching ratings of movie corresponding the given movie_id from the IMDB database
-    fetch(url)
-        //converting retrieved text data to json
-        .then(res => res.json())
-        //sending back response with retrieved JSON object
-        .then(data => {
-            console.log("Ratings FETCH successful!");
-            res.status(200).send(data);
-        })
-        .catch(err => {
-            console.log("Ratings FETCH Error!");
-            res.status(500).send(err);
-        });
+  //authentication check
+  if (loginStatus) {
+  //URL of IMDB endpoint for external GET request
+  //movie_id is the user search parameter
+  var url = "https://imdb-api.com/en/API/Ratings/"  + imdbKey + "/" + req.query.movie_id;
+  
+  //fetching ratings of movie corresponding the given movie_id from the IMDB database
+  fetch(url)
+      //converting retrieved text data to json
+      .then(res => res.json())
+      //sending back response with retrieved JSON object
+      .then(data => {
+          console.log("Ratings FETCH successful!");
+          res.status(200).send(data);
+      })
+      .catch(err => {
+          console.log("Ratings FETCH Error!");
+          res.status(500).send(err);
+      });
+  }
+  else {
+    console.log("rating endpoint: invalid token (not logged in).");
+    res.status(500).send({"message": "Error: invalid token."});
+  }
 })
 
 //Top250Movies IMDB API
@@ -155,25 +177,32 @@ app.get('/rating', function(req, res) {
 //each login will have their own collection
 app.get('/top250', function(req, res) {
 
-    //for debugging (inside movie search route)
-    console.log("STATUS: Top250Movies request!");
+  //for debugging (inside movie search route)
+  console.log("STATUS: Top250Movies request!");
 
-    //URL of IMDB endpoint for external GET request
-    var url = "https://imdb-api.com/en/API/Top250Movies/" + imdbKey;
-    
-    //fetching the top 250 movies of movies from the IMDB database
-    fetch(url)
-        //converting retrieved text data to json
-        .then(res => res.json())
-        //sending back response with retrieved JSON object
-        .then(data => {
-            console.log("Top250Movies FETCH successful!");
-            res.status(200).send(data);
-        })
-        .catch(err => {
-            console.log("Top250Movies FETCH Error!");
-            res.status(500).send(err);
-        });
+  //authentication check
+  if (loginStatus) {
+  //URL of IMDB endpoint for external GET request
+  var url = "https://imdb-api.com/en/API/Top250Movies/" + imdbKey;
+  
+  //fetching the top 250 movies of movies from the IMDB database
+  fetch(url)
+      //converting retrieved text data to json
+      .then(res => res.json())
+      //sending back response with retrieved JSON object
+      .then(data => {
+          console.log("Top250Movies FETCH successful!");
+          res.status(200).send(data);
+      })
+      .catch(err => {
+          console.log("Top250Movies FETCH Error!");
+          res.status(500).send(err);
+      });
+  }
+  else {
+    console.log("Seach endpoint: invalid token (not logged in).");
+    res.status(500).send({"message": "Error: invalid token."});
+  }
 })
 
 
@@ -185,6 +214,8 @@ app.get('/top250', function(req, res) {
 //the button will be on the movies' description page
 app.post('/addToWatchlist', function(req, res) {
     //using a MongoDB collection for Watchlist:
+    //authentication check
+    if (loginStatus) {
     var uri = "mongodb://127.0.0.1:27017/";
     //connecting to database
     MongoClient.connect(uri, {useUnifiedTopology: true}, function(err, client) {
@@ -242,12 +273,19 @@ app.post('/addToWatchlist', function(req, res) {
       }
     })
   });
+  }
+  else {
+    console.log("Seach endpoint: invalid token (not logged in).");
+    res.status(500).send({"message": "Error: invalid token."});
+  }
 })
 
 //delete route method
 //deletes a movie from the Watchlist collection in MongoDB given the movie ID
 app.delete('/deleteFromWatchlist', function(req, res) {
 
+    //authentication check
+    if (loginStatus) {
     //local database uri
     var uri = "mongodb://127.0.0.1:27017/";
   
@@ -289,13 +327,21 @@ app.delete('/deleteFromWatchlist', function(req, res) {
         });
       }
     });
-  }); //end of delete method
+  }
+  else {
+    console.log("Seach endpoint: invalid token (not logged in).");
+    res.status(500).send({"message": "Error: invalid token."});
+  }
+}); //end of delete method
 
 //Get Single Movie route method
 //shows a single movie from the Watchlist collection in MongoDB given the movie ID
 //This should re-render the page in react with the movie's description page
   app.get('/ShowMovieInfo', function(req, res) {
     //local database uri
+
+    //authentication check
+    if (loginStatus) {
     var uri = "mongodb://127.0.0.1:27017/";
 
     //connecting to MongoDB
@@ -336,6 +382,11 @@ app.delete('/deleteFromWatchlist', function(req, res) {
         });
       }
     });
+  }
+  else {
+    console.log("Seach endpoint: invalid token (not logged in).");
+    res.status(500).send({"message": "Error: invalid token."});
+  }
 }); //end of get by id method
 
 //List watchlist route method
@@ -344,6 +395,8 @@ app.get('/showWatchlist', function(req, res) {
     //local database uri
     var uri = "mongodb://127.0.0.1:27017/";
 
+    //authentication check
+    if (loginStatus) {
     //connecting to MongoDB
     MongoClient.connect(uri, { useUnifiedTopology: true }, function(err, client) {
       if (err) {
@@ -379,6 +432,11 @@ app.get('/showWatchlist', function(req, res) {
         });
       }
     });
+  }
+  else {
+    console.log("Seach endpoint: invalid token (not logged in).");
+    res.status(500).send({"message": "Error: invalid token."});
+  }
 }); //end of GET (matches) route
 
 

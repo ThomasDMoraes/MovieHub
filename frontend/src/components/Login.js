@@ -112,28 +112,28 @@ const logout = () => {
     signOut(auth);
 };
 
-//get token
-//send token to backend
-//verify token in backend
-//retrieve success or error response
+//gets token
+//sends token to backend
+//verify token in backend to allow nested endpoints
+//retrieves success or error console response
+//used in every react page when rendered
 const logInCheck = () => {
     if (!auth.currentUser) {
-        console.log("not logged in.");
+        console.log("not logged in (yet).");
     }
     else {
         console.log("logged in.");
-    auth.currentUser.getIdToken(true)
+        auth.currentUser.getIdToken(true)
         .then(idToken => {
         // Send token to your backend with axios request
         axios.get('http://localhost:5500/verifyUser?idToken=' + idToken)
             .then((response) => {
-                console.log("response:", response)
-                //handle response
+                console.log("response:", response)           
             })
         })
+        //not logged in (invalid token)
         .catch(error => {
             console.log("logInCheck error.")
-            //handle error
         });
     }
 }
@@ -151,13 +151,13 @@ function Login() {
     const navigate = useNavigate();
 
     //certified users are redirected to the Home page
-
+/*
     useEffect(() => {
         if (user) {
             navigate("./../");
         }
     }, [user]); //re-renders when user state changes
-
+*/
     return (<>
         {/* Login section */}
         <div className="login">
@@ -208,7 +208,7 @@ function Login() {
             </div>
         </div>
 
-        {/* <button onClick = {() => logInCheck()}>LOGIN CHECK (for testing)</button> */}
+        <button onClick = {() => logInCheck()}>LOGIN CHECK (for testing)</button>
 
     </>);
 }
