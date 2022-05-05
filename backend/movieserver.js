@@ -10,7 +10,7 @@ const fs = require('fs');
 const { query } = require('express');
 const MongoClient = require('mongodb').MongoClient;
 
-//*routes will require a user to be logged in* (not implemented yet)
+//*routes will require a user to be logged in*
 //used for Firebase Admin SDK authorization
 var admin = require("firebase-admin");
 //importing service account details
@@ -44,7 +44,8 @@ app.use((req, res, next) => {
 
 //used for authorization after authentication
 var loginStatus = false;
-
+//used for database watchlist selection
+var uid = ""
 //idToken comes from the frontend through an Axios request
 //not very safe private data handling, but it works for now
 app.get('/verifyUser', function(req, res) {
@@ -53,7 +54,7 @@ app.get('/verifyUser', function(req, res) {
     admin.auth().verifyIdToken(idToken)  
       .then((decodedToken) => {
         //valid token
-        const uid = decodedToken.uid;
+        uid = decodedToken.uid;
         console.log("user uid:", uid)
         //updating login status for other endpoints to use
         loginStatus = true;
@@ -208,13 +209,18 @@ app.get('/top250', function(req, res) {
 
 //Watchlist (MongoDB): ----------------------------------------------------
 
+//all Watchlist methods SHOULD be functional, but only the ADD method was properly tested,
+//since I didn't have time left to implement the frontend for the other methods.
+
 //Add route method
-//adds a movie to the watchlist collection in MongoDB given the movie ID and information
+//adds a movie to the user's watchlist collection in MongoDB given the movie ID and information
 //a movie should be added when clicked on a button for the frontend, sending the movie's ID
-//the button will be on the movies' description page
+//the button will be on the movies' description page (MovieInfo.js)
 app.post('/addToWatchlist', function(req, res) {
     //using a MongoDB collection for Watchlist:
+
     //authentication check
+    //a new watchlist collection for the user is automatically created if needed by MongoDB
     if (loginStatus) {
     var uri = "mongodb://127.0.0.1:27017/";
     //connecting to database
@@ -230,10 +236,12 @@ app.post('/addToWatchlist', function(req, res) {
     
     //preventing duplicates:
     //query parameters for duplicate search (already in the watchlist)
-    var query = {"_id": parseInt(req.body.movie_id)};
+    console.log("req.body.id:", req.body.movie_id);
+    var query = {"movie_id": req.body.movie_id};
  
     //searching the database for matches using first_name and last_name
-    dbo.collection("watchlist").find(query).toArray(function(err2, queryRes) {
+    //there is a distinct watchlist collection for each user
+    dbo.collection("watchlist:" + uid).find(query).toArray(function(err2, queryRes) {
       if (err2) {
         //something went wrong
         console.log("POST query error!");
@@ -248,18 +256,17 @@ app.post('/addToWatchlist', function(req, res) {
       else {
         //no matches were found, continues to create the document
         console.log("No duplicates found!");
-        
+
         //POST given important information from the movie's description page
-        var studentObj = {
-          "_id": req.body.movie_id,
-          "title": req.body.title,
+        var movieObj = {
+          "movie_id": req.body.movie_id,
+          "full_title": req.body.full_title,
           "image": req.body.image,
-          "description": req.body.description,
-          "IMDB_rating": req.body.rating
+          "IMDB_rating": req.body.IMDB_rating
         }
 
         //inserting student record into the students collection
-        dbo.collection("watchlist").insertOne(studentObj, function(err3) {
+        dbo.collection("watchlist:" + uid).insertOne(movieObj, function(err3) {
           if (err3) {
             //error message to the console and user client
             console.log("POST DB Add movie error");
@@ -300,12 +307,11 @@ app.delete('/deleteFromWatchlist', function(req, res) {
         //contains a watchlist collection for each account
         var dbo = client.db("movieTheaterDB");
   
-        //query parameters for matching IDs
-        //the movie_id needs to be type casted as a number to find matches in the database
-        var query = {"_id": parseInt(req.params.movie_id)};
+        //query parameters for matching movie IDs
+        var query = {"movie_id": req.body.movie_id};
   
         //deletes the first match with the given query parameters
-        dbo.collection("watchlist").deleteOne(query,function(err2, delRes) {
+        dbo.collection("watchlist:" + uid).deleteOne(query,function(err2, delRes) {
           if (err2) {
             //error message to the console and client
             console.log("DELETE: deletion error!");
@@ -354,12 +360,11 @@ app.delete('/deleteFromWatchlist', function(req, res) {
         //connecting to the database
         var dbo = client.db("movieTheaterDB");
   
-        //query parameters for matching IDs
-        //the movie_id needs to be type casted as a number to find matches in the database
-        var query = {"_id": parseInt(req.params.movie_id)};
+        //query parameters for matching movie IDs
+        var query = {"movie_id": req.body.movie_id};
   
         //finds the first match with the given query parameters
-        dbo.collection("watchlist").findOne(query, function(err2, findRes) {
+        dbo.collection("watchlist:"+ uid).findOne(query, function(err2, findRes) {
           if (err2) {
             //error message to the console and client
             console.log("ShowMovieInfo: search error!");
@@ -408,7 +413,7 @@ app.get('/showWatchlist', function(req, res) {
         var dbo = client.db("movieTheaterDB");
 
         //Returns all movies in the watchlist (no query parameter)
-        dbo.collection("students").find().toArray(function(err2, findRes) {
+        dbo.collection("watchlist:" + uid).find().toArray(function(err2, findRes) {
           if (err2) {
             //error message to the console and client
             console.log("Watchlist (LIST): search error!");

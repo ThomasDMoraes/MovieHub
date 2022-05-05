@@ -151,13 +151,13 @@ function Login() {
     const navigate = useNavigate();
 
     //certified users are redirected to the Home page
-/*
+
     useEffect(() => {
         if (user) {
             navigate("./../");
         }
     }, [user]); //re-renders when user state changes
-*/
+
     return (<>
         {/* Login section */}
         <div className="login">
@@ -207,9 +207,6 @@ function Login() {
                 </div>
             </div>
         </div>
-
-        <button onClick = {() => logInCheck()}>LOGIN CHECK (for testing)</button>
-
     </>);
 }
 

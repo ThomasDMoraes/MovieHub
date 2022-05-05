@@ -5,8 +5,6 @@
 
 //notes: need to integrate react-bootstrap for formatting, and align everything properly.
 
-
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 //useParams used to retrieve the current movieId in the URL
@@ -27,11 +25,12 @@ function MovieInfo() {
                                             "description": ""});
     //takes the movie ID in the URL parameters
     let { movieId } = useParams();
+    let [watchlistResponse, setWatchlistResponse] = useState({"message": ""});
     //authentication hook for authorization check
     const [user, loading, error] = useAuthState(auth);
     //used for redirection
     const navigate = useNavigate();
-    
+
     //useEffect hook is called once the page is rendered to retrieve and show movie info
     //and displays the page's selected movie information
     useEffect(() => {
@@ -56,13 +55,42 @@ function MovieInfo() {
             })
         }, 1000);
     }, []);
+
+    //sends the movie information as a data JSON object
+    let addToWatchlist = (e) => {
+        e.preventDefault();
+        axios.post('http://localhost:5500/addToWatchlist', {
+            "movie_id": response.id,
+            "full_title": response.fullTitle,
+            "image": response.image,
+            "IMDB_rating": response.imDbRating
+        })
+        .then((watchlistResponse) => {
+            //case success
+            //outputs the server response message to the console
+            console.log("response:", watchlistResponse.data.message)
+            //and sets it as the watchlist response for view
+            setWatchlistResponse(watchlistResponse.data);
+
+        })
+        .catch((watchlistError) => {
+            //case error
+            //outputs the error message from the server to the console
+            console.log(watchlistError.response.data.message);
+            //and sets it as the watchlist response for view
+            setWatchlistResponse(watchlistError.response.data.message);
+        })
+        .then(() => {
+            //always executed
+        })
+
+    }
     
     //renders a log in redirection button if user is not logged in after the authentication state is loaded
     if (!loading && !user) {
         return (<div>
             <h3>Please log in and try again.</h3>
             <button onClick={() => {navigate('.././Login')}}>Go to Login Page</button>
-
         </div>)
     }
     //user is comfirmed as logged in
@@ -71,7 +99,11 @@ function MovieInfo() {
             {/* outputting the movie information if successful */}
             {/* make the components into a grid for better layout */}
             {typeof response.fullTitle != "undefined" && response.fullTitle && 
-            <>
+            <div name="res" id="res">
+                {/* Watchlist ADD form button (send movie ID, fullTitle, rating, image) */}
+                <form onSubmit={addToWatchlist} target="res">
+                <button onClick={(e) => addToWatchlist}>Add to Watchlist</button>
+                </form> <br/> <br/> <br/>
                 {/* movie image/poster */}
                 <img src={response.image} alt="" height="400" />
                 {/* movie title header */}
@@ -82,11 +114,7 @@ function MovieInfo() {
                 <p>Rating: {response.imDbRating}</p>
                 {/* showing movie ID */}
                 <p>ID: {response.id}</p>
-            </>}    
-
-            {/* CREATE WATCHLIST ADD BUTTON */}
-
-
+            </div>}    
         </>)
         }
     }

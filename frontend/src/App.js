@@ -7,6 +7,7 @@ import MovieSearch from './components/MovieSearch'
 import MovieRatings from './components/MovieRatings'
 import Login from './components/Login'
 import MovieInfo from './components/MovieInfo'
+//import Watchlist from './components/Watchlist'
 //import { process_params } from 'express/lib/router';
 //used for authorization and logging out
 import { auth, logout, logInCheck } from './components/Login'
@@ -40,21 +41,16 @@ function App() {
       {user && <span>Logged in as: <strong>{user.email}</strong></span>} <br/>
 
       {/* watchlist link */}
-      {/*user && <Link to='/Watchlist'>Watchlist</Link>*/}
-
-
-      {/*user && <button onClick={() => logInCheck}>LoginCheck (testing)</button>*/} <br/>
+      {/* user && <Link to='/Watchlist'>Watchlist</Link> */}
       
       <br /> <br /> <br /> 
 
 
 
-      {/* Next: uncomment navigation in Login.js */}
-      {/* Next: apply login restrictions to the backend */}
       {/* Next: put Watchlist in the navbar */}
-      {/* Next: Watchlist (list,add,delete,view) implementations, with login and mongoDB */}
-      {/* Next: integrate bootstrap and work on formatting / lists to grids */}
-      {/* Finish writeup, readme, demo, and send */}
+      {/* Next: Watchlist (list,delete) implementations, with login and mongoDB */}
+      {/* Next: integrate bootstrap and work on propper Navbar + formatting / lists to Grids */}
+      {/* Next: Finish writeup, readme, demo, and send */}
 
 
       <Routes>
@@ -64,7 +60,9 @@ function App() {
         {/* MovieInfo has movieId passed as children to use for re-rendering the page appropriately */}
         <Route path = "/MovieInfo/:movieId" element={<MovieInfo/>} />
         <Route path = "/Login" element={<Login/>} />
-        {/* <Route path = "/Watchlist" element={<Watchlist/> /> */}
+
+        {/* Watchlist route (incomplete, thus not included) */}
+        {/*<Route path = "/Watchlist" element={<Watchlist/>} />*/}
       </Routes>
     </BrowserRouter>
   );
