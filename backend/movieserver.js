@@ -14,7 +14,7 @@ const MongoClient = require('mongodb').MongoClient;
 //used for Firebase Admin SDK authorization
 var admin = require("firebase-admin");
 //importing service account details
-var serviceAccount = require("./adminSDK_serviceAccount.json");
+var serviceAccount = require("./adminSDK_serviceAccount.json"); //NOTE: THIS FILE AND CLOUD PROJECT WERE REMOVED FOR SAFETY REASONS
 //initializing admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
