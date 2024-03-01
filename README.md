@@ -53,23 +53,22 @@ To do:
         Watchlist.js -> A page component containing the logged in user's watchlist (a list of movies they have saved).
 
 # Demo: 
-
 ## Home page:
-    <img src="MovieHub gifs/Home gif.gif"/> 
+<img src="MovieHub gifs/Home gif.gif"/> 
     
 ## Login page:
-    <img src="MovieHub gifs/Login gif.gif"/> 
+<img src="MovieHub gifs/Login gif.gif"/> 
     
 ## Search page:
-    <img src="MovieHub gifs/Search gif.gif"/> 
+<img src="MovieHub gifs/Search gif.gif"/> 
     
 ## MovieInfo and Watchlist pages:
-    <img src="MovieHub gifs/MovieInfo and Watchlist gif.gif"/> 
+<img src="MovieHub gifs/MovieInfo and Watchlist gif.gif"/> 
     
 ## Most Saved page:
-    <img src="MovieHub gifs/MostSaved gif.gif"/> 
+<img src="MovieHub gifs/Most Saved gif.gif"/> 
     
 ## Delete Account:
-    <img src="MovieHub gifs/Delete Account gif.gif"/> 
+<img src="MovieHub gifs/Delete Account gif.gif"/> 
 
 
