@@ -82,7 +82,7 @@ async function isLoggedIn(username, token) {
   //Verifying tokens
   try {
     //validating token and getting its user object
-    const client = new CognitoIdentityProviderClient(config);
+    const client = new CognitoIdentityProviderClient();
     const input = { 
       AccessToken: token
     };
@@ -339,6 +339,11 @@ async function removeFromWatchlist(username, imdbID) {
             returnObj.statusCode = 500;
             returnObj.message = "Unexpected server error.";
           });
+        }
+        else {
+          //Does not need to delete the record, so it's done.
+          returnObj.statusCode = 200;
+          returnObj.message = "Removed movie from watchlist!";
         }
       }
       else {

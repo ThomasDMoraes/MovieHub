@@ -238,7 +238,6 @@ function Login() {
                                         <Card.Subtitle className="pb-2 border-bottom border-2"><h4>Password:</h4></Card.Subtitle>
                                         <Form.Control className="my-4" type="password" placeholder="password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)}></Form.Control>
                                             <Button className="btn-primary border border-5 ms-1" style={{width:"50%"}} onClick={() => registerWithEmailAndPassword(registerUsername, registerEmail, registerPassword)}>Register</Button>
-                                            <Button className="btn-primary border border-5 ms-1" style={{width:"50%"}} onClick={() => createWatchlist(registerUsername)}>createWL(TEST)</Button>
                                     </Form.Group>
                                 </Form>
                             </Card.Body>
